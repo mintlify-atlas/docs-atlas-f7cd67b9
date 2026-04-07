@@ -1,0 +1,186 @@
+---
+title: "General settings"
+description: "Configure theme, resolution, opacity, story mode, AI thread sorting, and other general video settings in config.toml."
+---
+
+The `[settings]` block controls the visual appearance of the video and how the bot selects and processes Reddit threads. The `[ai]` block enables keyword-based thread sorting.
+
+<Note>
+  Story mode and comment mode are mutually exclusive. When `storymode = true`, the bot reads out the post title and body as a continuous narrative. When `storymode = false` (the default), the bot reads individual comments over the background video.
+</Note>
+
+---
+
+## [settings] reference
+
+<ParamField path="allow_nsfw" type="boolean" required default="false">
+  Whether to allow NSFW-tagged posts to be selected. When `false`, NSFW posts are filtered out.
+
+  **Options:** `true`, `false`
+
+  **Default:** `false`
+</ParamField>
+
+<ParamField path="theme" type="string" required default="dark">
+  The Reddit UI theme used when Playwright takes screenshots of the post and comments.
+
+  **Options:** `dark`, `light`, `transparent`
+
+  **Default:** `dark`
+
+  <Tip>
+    The `transparent` option is only useful when `storymode = true`. In comment mode, a transparent background may make text harder to read over gameplay footage.
+  </Tip>
+</ParamField>
+
+<ParamField path="times_to_run" type="integer" required default="1">
+  Number of videos to generate in a single run. Each iteration fetches a new thread (or cycles through queued post IDs) and produces a separate output file.
+
+  - Minimum: `1`
+
+  **Default:** `1`
+
+  **Example:** `4`
+</ParamField>
+
+<ParamField path="opacity" type="float" required default="0.9">
+  Opacity of the comment screenshot overlays on top of the background video. `1.0` is fully opaque; `0.0` is fully transparent.
+
+  - Minimum: `0`
+  - Maximum: `1`
+
+  **Default:** `0.9`
+
+  **Example:** `0.8`
+</ParamField>
+
+<ParamField path="storymode" type="boolean" default="false">
+  When `true`, the bot reads only the post title and post body (not individual comments). Useful for subreddits with long narrative posts such as `r/AITA` or `r/NoSleep`.
+
+  **Options:** `true`, `false`
+
+  **Default:** `false`
+</ParamField>
+
+<ParamField path="storymodemethod" type="integer" default="1">
+  Visual style for story mode. Only applies when `storymode = true`.
+
+  - `0` — Displays a single static screenshot for the entire video
+  - `1` — Fancy scrolling style with a more polished look
+
+  **Options:** `0`, `1`
+
+  **Default:** `1`
+</ParamField>
+
+<ParamField path="storymode_max_length" type="integer" default="1000">
+  Maximum length of the story text in characters. The post body is truncated to this limit before TTS generation begins. Approximately 200 characters correspond to 50 seconds of audio.
+
+  - Minimum: `1`
+
+  **Default:** `1000`
+</ParamField>
+
+<ParamField path="resolution_w" type="integer" required default="1080">
+  Width of the final video in pixels. `1080` × `1920` produces a standard 9:16 portrait video suitable for TikTok and YouTube Shorts.
+
+  **Default:** `1080`
+
+  **Example:** `1440`
+</ParamField>
+
+<ParamField path="resolution_h" type="integer" required default="1920">
+  Height of the final video in pixels.
+
+  **Default:** `1920`
+
+  **Example:** `2560`
+</ParamField>
+
+<ParamField path="zoom" type="float" default="1">
+  Browser zoom level used by Playwright when taking screenshots. Increase this value to make the Reddit text appear larger in the final video.
+
+  - Minimum: `0.1`
+  - Maximum: `2`
+
+  **Default:** `1`
+
+  **Example:** `1.1`
+</ParamField>
+
+<ParamField path="channel_name" type="string" default="Reddit Tales">
+  The channel name embedded in the video metadata and used in the output filename.
+
+  **Default:** `Reddit Tales`
+
+  **Example:** `Reddit Stories`
+</ParamField>
+
+---
+
+## Story mode vs. comment mode
+
+<Tabs>
+  <Tab title="Comment mode (default)">
+    The bot fetches the top comments from the selected post. Each comment is screenshotted and read aloud individually. Comments are filtered by `min_comment_length` and `max_comment_length`.
+
+    ```toml config.toml
+    [settings]
+    storymode = false
+    ```
+  </Tab>
+  <Tab title="Story mode">
+    The bot reads only the post title and body text. This mode works best for narrative subreddits. Use `storymodemethod = 1` for the best-looking result, and tune `storymode_max_length` to control video length.
+
+    ```toml config.toml
+    [settings]
+    storymode = true
+    storymodemethod = 1
+    storymode_max_length = 1000
+    theme = "dark"
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## [ai] reference
+
+The `[ai]` block enables semantic similarity sorting. When enabled, threads fetched from the subreddit are ranked by how closely they match a set of keywords, and the most relevant post is selected.
+
+<ParamField path="ai_similarity_enabled" type="boolean" default="false">
+  Enable AI-based thread sorting by keyword similarity.
+
+  **Options:** `true`, `false`
+
+  **Default:** `false`
+</ParamField>
+
+<ParamField path="ai_similarity_keywords" type="string">
+  A comma-separated list of keywords or phrases used to score subreddit threads. The thread with the highest similarity score is selected.
+
+  **Example:** `Elon Musk, Twitter, Stocks`
+</ParamField>
+
+---
+
+## Complete settings example
+
+```toml config.toml
+[settings]
+allow_nsfw = false
+theme = "dark"
+times_to_run = 1
+opacity = 0.9
+storymode = false
+storymodemethod = 1
+storymode_max_length = 1000
+resolution_w = 1080
+resolution_h = 1920
+zoom = 1
+channel_name = "Reddit Tales"
+
+[ai]
+ai_similarity_enabled = false
+ai_similarity_keywords = ""
+```

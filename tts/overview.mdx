@@ -1,0 +1,119 @@
+---
+title: "Text-to-Speech Overview"
+description: "Compare every TTS engine supported by RedditVideoMakerBot, understand how the TTSEngine wrapper works, and configure common TTS settings."
+---
+
+RedditVideoMakerBot supports seven TTS backends. All of them share the same wrapper (`TTS/engine_wrapper.py`) and a common set of config keys under `[settings.tts]`.
+
+## Engine Comparison
+
+<CardGroup cols={2}>
+  <Card title="TikTok" icon="music" href="/tts/tiktok">
+    High-quality voices including Disney characters and vocal styles. Requires a TikTok account session ID. Max 200 characters per request.
+  </Card>
+  <Card title="ElevenLabs" icon="waveform" href="/tts/elevenlabs">
+    Premium AI voices with the most natural-sounding output. Requires a paid API key. Max 2,500 characters per request.
+  </Card>
+  <Card title="AWS Polly" icon="aws" href="/tts/other-engines#aws-polly">
+    Neural speech synthesis via Amazon Web Services. Requires the AWS CLI and a configured `polly` profile. Max 3,000 characters per request.
+  </Card>
+  <Card title="Streamlabs Polly" icon="microphone" href="/tts/other-engines#streamlabs-polly">
+    Free access to Polly voices through the Streamlabs API — no AWS account needed. Max 550 characters per request.
+  </Card>
+  <Card title="Google Translate TTS" icon="google" href="/tts/other-engines#google-translate-tts">
+    Uses `gTTS` (Google Text-to-Speech). No API key required; voice follows the `post_lang` setting. Max 5,000 characters per request.
+  </Card>
+  <Card title="OpenAI TTS" icon="sparkles" href="/tts/other-engines#openai-tts">
+    OpenAI's `/audio/speech` endpoint. Supports `tts-1`, `tts-1-hd`, and `gpt-4o-mini-tts` models. Requires an OpenAI API key. Max 4,096 characters per request.
+  </Card>
+  <Card title="pyttsx3" icon="desktop" href="/tts/other-engines#pyttsx3">
+    Fully offline, system TTS (SAPI5 on Windows, NSSpeechSynthesizer on macOS, eSpeak on Linux). No internet or API key required. Max 5,000 characters per request.
+  </Card>
+</CardGroup>
+
+## Common TTS Config Settings
+
+All keys live under the `[settings.tts]` section in `config.toml`.
+
+<ParamField path="voice_choice" type="string" required>
+  The TTS backend to use. One of: `tiktok`, `elevenlabs`, `streamlabspolly`, `awspolly`, `googletranslate`, `OpenAI`, `pyttsx`.
+
+  ```toml
+  voice_choice = "tiktok"
+  ```
+</ParamField>
+
+<ParamField path="random_voice" type="bool" default="true">
+  When `true`, a different voice is randomly selected for each comment. When `false`, the voice specified by the engine-specific config key is used for every clip.
+
+  ```toml
+  random_voice = false
+  ```
+</ParamField>
+
+<ParamField path="silence_duration" type="float" default="0.3">
+  The length of the silent gap (in seconds) inserted between TTS clips when a comment is split across multiple audio files.
+
+  ```toml
+  silence_duration = 0.3
+  ```
+</ParamField>
+
+<ParamField path="no_emojis" type="bool" default="false">
+  When `true`, emojis are stripped from comment text before it is sent to the TTS engine.
+
+  ```toml
+  no_emojis = false
+  ```
+</ParamField>
+
+## How the TTSEngine Wrapper Works
+
+`TTS/engine_wrapper.py` provides the `TTSEngine` class, which drives all TTS generation in a uniform way regardless of which backend is active.
+
+```python
+# engine_wrapper.py (simplified)
+class TTSEngine:
+    def __init__(self, tts_module, reddit_object, path="assets/temp/",
+                 max_length=DEFAULT_MAX_LENGTH, last_clip_length=0):
+        self.tts_module = tts_module()   # instantiates the chosen engine class
+        ...
+
+    def run(self) -> Tuple[int, int]:
+        self.add_periods()
+        self.call_tts("title", process_text(self.reddit_object["thread_title"]))
+        for idx, comment in track(enumerate(self.reddit_object["comments"])):
+            if self.length > self.max_length and idx > 1:
+                break
+            if len(comment["comment_body"]) > self.tts_module.max_chars:
+                self.split_post(comment["comment_body"], idx)
+            else:
+                self.call_tts(f"{idx}", process_text(comment["comment_body"]))
+        return self.length, idx
+
+    def call_tts(self, filename, text):
+        # googletranslate does not accept the random_voice argument
+        if voice_choice == "googletranslate":
+            self.tts_module.run(text, filepath=...)
+        else:
+            self.tts_module.run(text, filepath=..., random_voice=...)
+```
+
+Key behaviours:
+
+- **`add_periods()`** — normalises comment text before synthesis: strips URLs, replaces newlines with `. `, and expands abbreviations like `AI` → `A.I` so the TTS engine pauses correctly.
+- **`split_post()`** — if a comment exceeds the engine's `max_chars` limit, it is split on sentence boundaries and concatenated with a silence gap using `ffmpeg`.
+- **`create_silence_mp3()`** — generates a silent MP3 of `silence_duration` seconds using MoviePy; this gap is inserted between split parts.
+- **`process_text()`** — sanitises text and, when `post_lang` is set, translates it via the `translators` library before synthesis.
+
+## Maximum Video Length
+
+```python
+DEFAULT_MAX_LENGTH: int = 50  # seconds
+```
+
+`TTSEngine` accumulates the duration of each generated MP3. Once the total exceeds `DEFAULT_MAX_LENGTH` (50 seconds), it stops processing further comments. This limit is intentionally conservative and can be changed in `engine_wrapper.py`, though it is not officially supported.
+
+<Note>
+  Story mode has its own length cap controlled by `storymode_max_length` (default 1,000 characters, approximately 50 seconds of speech) in `[settings]`.
+</Note>

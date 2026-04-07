@@ -1,0 +1,99 @@
+---
+title: "Story Mode"
+description: "Read the full post body as a single narrated video instead of cycling through individual comments."
+---
+
+Story mode changes what the bot reads aloud and what it shows on screen. Instead of reading individual comments, the bot narrates the **post body** from start to finish, making it ideal for subreddits where the post itself is the content.
+
+## How It Works
+
+When `storymode = true`, the pipeline skips comment fetching and screenshot-per-comment logic. The post title is read first, followed by the full post body text. Two display styles are available, controlled by `storymodemethod`.
+
+<Tabs>
+  <Tab title="Method 0 — Single image">
+    A single static screenshot of the post body is captured and displayed for the entire duration of the narration. This is the simpler option and produces a cleaner look with no transitions.
+
+    ```toml
+    [settings]
+    storymode       = true
+    storymodemethod = 0
+    ```
+
+    The screenshot (`story_content.png`) is taken from the `[data-click-id="text"]` element on the Reddit post page using a headless browser.
+  </Tab>
+  <Tab title="Method 1 — Animated multi-image">
+    The post body is split into segments, and each segment is rendered as a separate image using the `imagemaker` utility. Images are displayed sequentially, each timed to its corresponding audio clip, creating a slide-show effect.
+
+    ```toml
+    [settings]
+    storymode       = true
+    storymodemethod = 1
+    ```
+
+    This method supports the `transparent` theme, which renders text on a transparent background so only the text cards are visible over the gameplay footage.
+  </Tab>
+</Tabs>
+
+## Controlling Length
+
+The `storymode_max_length` setting caps how many characters of the post body are read. Longer posts are truncated at this limit before TTS generation.
+
+```toml
+[settings]
+storymode_max_length = 1000
+```
+
+<Note>
+  Approximately **200 characters ≈ 50 seconds** of narration. The default of 1000 characters produces videos of around 4–5 minutes depending on the TTS voice speed.
+</Note>
+
+Use this as a rough guide when tuning for a target video length:
+
+| Target length | Approximate character limit |
+|---|---|
+| ~1 minute | 250 |
+| ~2 minutes | 500 |
+| ~4 minutes | 1000 (default) |
+| ~8 minutes | 2000 |
+
+## Full Configuration Example
+
+```toml
+[settings]
+storymode            = true
+storymodemethod      = 1
+storymode_max_length = 800
+theme                = "dark"
+
+[settings.tts]
+voice_choice = "tiktok"
+tiktok_voice = "en_us_001"
+
+[reddit.thread]
+subreddit = "nosleep"
+random    = true
+```
+
+## Recommended Subreddits
+
+Story mode works best on subreddits where the post body contains the full story rather than a one-liner that spawns comment discussion.
+
+<CardGroup cols={3}>
+  <Card title="r/nosleep" icon="moon">
+    Horror fiction and creepypasta written in the first person. Long, atmospheric posts that work perfectly as narrated videos.
+  </Card>
+  <Card title="r/tifu" icon="face-flushed">
+    "Today I F***ed Up" confession stories. Casual, conversational tone that sounds natural when read by TTS.
+  </Card>
+  <Card title="r/WritingPrompts" icon="pen">
+    Short fiction responses to creative prompts. Well-structured narratives with a clear beginning and end.
+  </Card>
+</CardGroup>
+
+<Tip>
+  Pair story mode with `theme = "transparent"` and `storymodemethod = 1` for the animated card style that is common on short-form video platforms.
+</Tip>
+
+<Warning>
+  Story mode with `storymodemethod = 0` and `theme = "transparent"` falls back to `dark` theme automatically. Transparent backgrounds are only supported with method 1.
+</Warning>

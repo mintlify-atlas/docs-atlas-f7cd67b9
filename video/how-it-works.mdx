@@ -1,0 +1,128 @@
+---
+title: "How Video Creation Works"
+description: "A step-by-step breakdown of the full pipeline that turns a Reddit thread into a finished MP4 video."
+---
+
+The bot's entry point is `main.py`. Each time you run it, the following pipeline executes in sequence. Understanding the pipeline helps you tune settings and troubleshoot failures.
+
+## The Pipeline
+
+<Steps>
+  <Step title="Fetch Reddit thread — get_subreddit_threads">
+    The bot authenticates with the Reddit API using the credentials in your `config.toml` and fetches a thread from the configured subreddit.
+
+    If `post_id` is set, that exact post is used. Otherwise the bot picks the top post from the subreddit that meets the minimum comment count and length requirements. The result is a `reddit_object` dictionary that carries the thread title, URL, body text, and a list of comments for every subsequent step.
+
+    ```toml
+    [reddit.thread]
+    subreddit = "AskReddit"
+    post_id   = ""        # leave empty to pick automatically
+    random    = false
+    min_comments = 20
+    ```
+  </Step>
+
+  <Step title="Generate TTS audio — save_text_to_mp3">
+    Every piece of text that will appear in the video — the post title, and each comment — is converted to an MP3 file using the configured TTS provider (TikTok, ElevenLabs, OpenAI, AWS Polly, and others).
+
+    Audio clips are saved to `assets/temp/<thread_id>/mp3/`. The function returns the **total audio length in seconds** and the **number of comment clips** produced. These values control every timing decision downstream.
+
+    ```toml
+    [settings.tts]
+    voice_choice   = "tiktok"
+    tiktok_voice   = "en_us_001"
+    silence_duration = 0.3     # seconds of silence between clips
+    ```
+  </Step>
+
+  <Step title="Screenshot Reddit posts — get_screenshots_of_reddit_posts">
+    A headless Chromium browser (via Playwright) logs into Reddit with your credentials, navigates to the thread, and takes a screenshot of each element that will appear on screen.
+
+    - In **comment mode** (the default), one screenshot is taken per comment card.
+    - In **story mode**, the post body is captured instead (see [Story Mode](/video/story-mode)).
+
+    Screenshots are saved as PNG files to `assets/temp/<thread_id>/png/`. The browser respects the `theme` setting (`dark`, `light`, or `transparent`) and can optionally translate text via Google Translate before screenshotting.
+
+    ```toml
+    [settings]
+    theme = "dark"
+    zoom  = 1.0
+    ```
+  </Step>
+
+  <Step title="Download background video — download_background_video">
+    The bot checks whether the selected background video already exists under `assets/backgrounds/video/`. If the file is not present, it is downloaded from YouTube using **yt-dlp** at up to 1080p MP4 quality.
+
+    This download only happens once; subsequent runs reuse the cached file.
+
+    ```toml
+    [settings.background]
+    background_video = "minecraft"
+    ```
+  </Step>
+
+  <Step title="Download background audio — download_background_audio">
+    The same caching logic applies to the background audio track. If the file is absent from `assets/backgrounds/audio/`, it is fetched from YouTube as a best-quality audio stream and saved there.
+
+    ```toml
+    [settings.background]
+    background_audio = "lofi"
+    ```
+  </Step>
+
+  <Step title="Trim background clip — chop_background">
+    A random interval from the downloaded background files is extracted to match the exact length of the TTS audio. The start position is chosen randomly (skipping the first 180 seconds of the source to avoid intros) so that repeated runs on the same background look different.
+
+    The trimmed clips are written to:
+    - `assets/temp/<thread_id>/background.mp4`
+    - `assets/temp/<thread_id>/background.mp3`
+  </Step>
+
+  <Step title="Render the final video — make_final_video">
+    All assets are combined using **ffmpeg**:
+
+    1. The background video is cropped to the target aspect ratio (default 1080×1920).
+    2. Screenshot images are overlaid at the center, timed to their corresponding audio clip.
+    3. The TTS audio is mixed with the background music track (respecting `background_audio_volume`).
+    4. A credit watermark for the background creator is drawn in the bottom-right corner.
+    5. If `background_thumbnail` is enabled, a thumbnail PNG is generated alongside the video.
+
+    The finished video is saved to:
+
+    ```
+    results/<subreddit>/<thread_title>.mp4
+    ```
+
+    If `enable_extra_audio` is `true`, a second copy without background music is also saved to:
+
+    ```
+    results/<subreddit>/OnlyTTS/<thread-title>.mp4
+    ```
+
+    Temporary files under `assets/temp/<thread_id>/` are deleted automatically after a successful render.
+  </Step>
+</Steps>
+
+## Output Location
+
+Videos are saved to `results/<subreddit>/` using the thread title as the filename (special characters are stripped and the name is capped at 251 characters to avoid filesystem limits). The subreddit name is taken from `config.toml` at `reddit.thread.subreddit`.
+
+## Batch Mode
+
+Set `times_to_run` to an integer greater than `1` to process multiple threads back-to-back. Each iteration calls the full pipeline, picking the next eligible post from the subreddit.
+
+```toml
+[settings]
+times_to_run = 5
+```
+
+Alternatively, supply a `+`-separated list of post IDs to process specific threads in one run:
+
+```toml
+[reddit.thread]
+post_id = "abc123+def456+ghi789"
+```
+
+<Note>
+  The bot requires **Python 3.10, 3.11, or 3.12**. It will exit with an error on any other version.
+</Note>

@@ -1,0 +1,97 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "Reddit Video Maker Bot",
+  "projectDescription": "An automated Python tool that creates short-form Reddit videos with AI-generated voiceovers and gameplay backgrounds using a single command.",
+  "theme": "almond",
+  "primaryColor": "#fba060",
+  "lightColor": "#fcb487",
+  "darkColor": "#ffffff",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "docker"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/reddit-credentials",
+              "configuration/settings",
+              "configuration/backgrounds"
+            ]
+          },
+          {
+            "group": "Text-to-Speech",
+            "pages": [
+              "tts/overview",
+              "tts/tiktok",
+              "tts/elevenlabs",
+              "tts/other-engines"
+            ]
+          },
+          {
+            "group": "Video Creation",
+            "pages": [
+              "video/how-it-works",
+              "video/story-mode",
+              "video/backgrounds",
+              "video/gui"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Config Reference",
+            "pages": [
+              "reference/config-toml",
+              "reference/background-options",
+              "reference/voice-options"
+            ]
+          },
+          {
+            "group": "Troubleshooting & Contributing",
+            "pages": [
+              "troubleshooting",
+              "contributing"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Automated Reddit thread fetching via PRAW API",
+    "Multiple TTS engine support: TikTok, ElevenLabs, AWS Polly, Google Translate, OpenAI, pyttsx3",
+    "Gameplay background video overlays (Minecraft, GTA, Rocket League, and more)",
+    "Background music with adjustable volume",
+    "Story mode for long-form post narration",
+    "Light/dark/transparent Reddit UI themes for screenshots",
+    "AI-powered thread similarity sorting",
+    "Multi-language translation support (50+ languages)",
+    "Web-based GUI via Flask",
+    "Docker support",
+    "Batch video creation with configurable run count"
+  ],
+  "publicApiSurface": [
+    "python main.py — entry point to generate a video",
+    "config.toml — primary configuration file",
+    "[reddit.creds] — Reddit API credentials block",
+    "[reddit.thread] — subreddit and post selection options",
+    "[settings] — general video settings (theme, resolution, opacity, storymode)",
+    "[settings.background] — background video and audio selection",
+    "[settings.tts] — TTS engine selection and voice options",
+    "[ai] — AI similarity keyword sorting",
+    "GUI.py — Flask web interface on localhost:4000",
+    "TTS engines: tiktok, elevenlabs, streamlabspolly, awspolly, googletranslate, pyttsx, OpenAI"
+  ]
+}

@@ -1,0 +1,294 @@
+---
+title: "Other TTS Engines"
+description: "Configure AWS Polly, Streamlabs Polly, Google Translate TTS, OpenAI TTS, and pyttsx3 as TTS backends for RedditVideoMakerBot."
+---
+
+<Tabs>
+  <Tab title="AWS Polly">
+
+## AWS Polly
+
+AWS Polly uses Amazon's neural speech synthesis service. It requires the AWS CLI to be installed and a named profile called `polly` to be configured. Max **3,000 characters** per request.
+
+### Setup
+
+<Steps>
+  <Step title="Install the AWS CLI">
+    Follow the platform-specific guide:
+
+    - **Linux:** https://docs.aws.amazon.com/polly/latest/dg/setup-aws-cli.html
+    - **Windows:** https://docs.aws.amazon.com/polly/latest/dg/install-voice-plugin2.html
+  </Step>
+  <Step title="Configure a profile named polly">
+    ```bash
+    aws configure --profile polly
+    ```
+
+    Enter your AWS Access Key ID, Secret Access Key, and preferred region when prompted.
+  </Step>
+  <Step title="Update your config">
+    ```toml
+    [settings.tts]
+    voice_choice     = "awspolly"
+    aws_polly_voice  = "Matthew"
+    random_voice     = false
+    ```
+  </Step>
+</Steps>
+
+### Config Reference
+
+<ParamField path="voice_choice" type="string" required>
+  Must be set to `"awspolly"`.
+</ParamField>
+
+<ParamField path="aws_polly_voice" type="string" default="Matthew">
+  The Polly voice ID to use. The value is capitalised automatically. Used when `random_voice` is `false`.
+</ParamField>
+
+<ParamField path="random_voice" type="bool" default="true">
+  When `true`, picks randomly from the voice list below.
+</ParamField>
+
+### Available Voices
+
+`Brian`, `Emma`, `Russell`, `Joey`, `Matthew`, `Joanna`, `Kimberly`, `Amy`, `Geraint`, `Nicole`, `Justin`, `Ivy`, `Kendra`, `Salli`, `Raveena`
+
+All voices are requested using the `neural` engine.
+
+<Warning>
+  If the `polly` AWS profile is not found, the bot prints setup instructions and exits. Make sure `aws configure --profile polly` has been run before starting the bot.
+</Warning>
+
+  </Tab>
+  <Tab title="Streamlabs Polly">
+
+## Streamlabs Polly
+
+Streamlabs Polly proxies requests to Amazon Polly through the Streamlabs API at `https://streamlabs.com/polly/speak`. No AWS account is required. Max **550 characters** per request.
+
+### Setup
+
+No external tools are required. Simply set the config keys:
+
+```toml
+[settings.tts]
+voice_choice            = "streamlabspolly"
+streamlabs_polly_voice  = "Brian"
+random_voice            = false
+```
+
+### Config Reference
+
+<ParamField path="voice_choice" type="string" required>
+  Must be set to `"streamlabspolly"`.
+</ParamField>
+
+<ParamField path="streamlabs_polly_voice" type="string" default="Matthew">
+  The Polly voice name to request. The value is capitalised automatically.
+</ParamField>
+
+<ParamField path="random_voice" type="bool" default="true">
+  When `true`, picks randomly from the voice list below.
+</ParamField>
+
+### Available Voices
+
+`Brian`, `Emma`, `Russell`, `Joey`, `Matthew`, `Joanna`, `Kimberly`, `Amy`, `Geraint`, `Nicole`, `Justin`, `Ivy`, `Kendra`, `Salli`, `Raveena`
+
+<Note>
+  The Streamlabs endpoint may enforce rate limits. The engine handles this automatically by retrying the request when a rate-limit response is detected.
+</Note>
+
+  </Tab>
+  <Tab title="Google Translate TTS">
+
+## Google Translate TTS
+
+Google Translate TTS uses the `gTTS` (Google Text-to-Speech) Python library. No API key or account is required. Max **5,000 characters** per request.
+
+### Setup
+
+No API key is needed. Set the config key and optionally set a language:
+
+```toml
+[settings.tts]
+voice_choice = "googletranslate"
+```
+
+The language is taken from the `post_lang` setting in `[reddit.thread]`. If `post_lang` is empty the engine defaults to English (`en`).
+
+```toml
+[reddit.thread]
+post_lang = "es"   # Spanish, for example
+```
+
+### Config Reference
+
+<ParamField path="voice_choice" type="string" required>
+  Must be set to `"googletranslate"`.
+</ParamField>
+
+<Note>
+  Google Translate TTS does not accept a `random_voice` argument. The `TTSEngine` wrapper detects this and calls `run(text, filepath)` without the `random_voice` parameter when this engine is active.
+</Note>
+
+<Tip>
+  Because this engine reads `post_lang`, setting a language here both translates the post text (via the `translators` library) and changes the TTS voice language at the same time.
+</Tip>
+
+  </Tab>
+  <Tab title="OpenAI TTS">
+
+## OpenAI TTS
+
+The OpenAI TTS engine calls the `/audio/speech` endpoint of the OpenAI API (or any compatible endpoint). It supports three model variants and ten voices. Max **4,096 characters** per request.
+
+### Setup
+
+<Steps>
+  <Step title="Get an OpenAI API key">
+    Create a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
+  </Step>
+  <Step title="Update your config">
+    ```toml
+    [settings.tts]
+    voice_choice       = "OpenAI"
+    openai_api_key     = "sk-abc123def456..."
+    openai_api_url     = "https://api.openai.com/v1/"
+    openai_voice_name  = "alloy"
+    openai_model       = "tts-1"
+    random_voice       = false
+    ```
+  </Step>
+</Steps>
+
+### Config Reference
+
+<ParamField path="voice_choice" type="string" required>
+  Must be set to `"OpenAI"` (capital O).
+</ParamField>
+
+<ParamField path="openai_api_key" type="string" required>
+  Your OpenAI API key. The engine raises a `ValueError` at startup if this is missing.
+
+  Example: `"sk-abc123def456..."`
+</ParamField>
+
+<ParamField path="openai_api_url" type="string" default="https://api.openai.com/v1/">
+  Base URL of the API endpoint. A trailing slash is stripped automatically and `/audio/speech` is appended. Override this to use a compatible third-party endpoint.
+</ParamField>
+
+<ParamField path="openai_voice_name" type="string" default="alloy">
+  Voice to use when `random_voice` is `false`. The value is lower-cased before the API call.
+
+  Options: `alloy`, `ash`, `coral`, `echo`, `fable`, `onyx`, `nova`, `sage`, `shimmer`, `af_heart`
+</ParamField>
+
+<ParamField path="openai_model" type="string" default="tts-1">
+  The model variant to use.
+
+  Options: `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts`
+</ParamField>
+
+<ParamField path="random_voice" type="bool" default="true">
+  When `true`, picks randomly from the available voices: `alloy`, `ash`, `coral`, `echo`, `fable`, `onyx`, `nova`, `sage`, `shimmer`. Note that `af_heart` is a valid voice for explicit selection but is not included in the random pool.
+</ParamField>
+
+### Voice Options
+
+| Voice | Notes |
+|---|---|
+| `alloy` | Neutral, versatile |
+| `ash` | |
+| `coral` | |
+| `echo` | |
+| `fable` | |
+| `onyx` | Deep |
+| `nova` | |
+| `sage` | |
+| `shimmer` | Soft |
+| `af_heart` | Available in config options |
+
+### Model Comparison
+
+| Model | Quality | Speed | Cost |
+|---|---|---|---|
+| `tts-1` | Standard | Fastest | Lowest |
+| `tts-1-hd` | High Definition | Slower | Higher |
+| `gpt-4o-mini-tts` | GPT-4o Mini | — | — |
+
+  </Tab>
+  <Tab title="pyttsx3">
+
+## pyttsx3
+
+`pyttsx3` is a fully offline TTS engine that uses the operating system's built-in speech synthesiser: SAPI5 on Windows, NSSpeechSynthesizer on macOS, and eSpeak on Linux. No internet connection or API key is required. Max **5,000 characters** per request.
+
+### Setup
+
+<Steps>
+  <Step title="Find your available voices">
+    Run the `ptt.py` helper script to list all voices installed on your system. Each voice is spoken aloud and its index is printed.
+
+    ```bash
+    python ptt.py
+    ```
+
+    The script enumerates voices like this:
+
+    ```python
+    engine = pyttsx3.init()
+    voices = engine.getProperty("voices")
+    for voice in voices:
+        print(voice, voice.id)
+        engine.setProperty("voice", voice.id)
+        engine.say("Hello World!")
+        engine.runAndWait()
+    ```
+
+    Note the zero-based index of the voice you want to use.
+  </Step>
+  <Step title="Update your config">
+    ```toml
+    [settings.tts]
+    voice_choice  = "pyttsx"
+    python_voice  = "1"
+    py_voice_num  = "2"
+    random_voice  = false
+    ```
+  </Step>
+</Steps>
+
+### Config Reference
+
+<ParamField path="voice_choice" type="string" required>
+  Must be set to `"pyttsx"`.
+</ParamField>
+
+<ParamField path="python_voice" type="string" default="1">
+  Zero-based index of the system voice to use. Run `ptt.py` to discover the index for each installed voice.
+
+  Example: `"0"` for the first voice, `"1"` for the second.
+</ParamField>
+
+<ParamField path="py_voice_num" type="string" default="2">
+  Total number of system voices to make available for random selection. Windows typically ships with 2 pre-installed SAPI5 voices.
+
+  Example: `"2"` means voices at index 0 and 1 are in the random pool.
+</ParamField>
+
+<ParamField path="random_voice" type="bool" default="true">
+  When `true`, picks a random index between `0` and `py_voice_num - 1`.
+</ParamField>
+
+<Warning>
+  If either `python_voice` or `py_voice_num` is blank, the engine raises a `ValueError` and falls back to internal defaults (`voice_id = 2`, `voice_num = 3`). Always set both values explicitly.
+</Warning>
+
+<Note>
+  On Windows, only voices installed through the **Speech** settings panel (or third-party SAPI5 voice packs) will appear. On Linux, install additional eSpeak voices with `apt-get install espeak-data`.
+</Note>
+
+  </Tab>
+</Tabs>

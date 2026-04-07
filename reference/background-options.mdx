@@ -1,0 +1,85 @@
+---
+title: "Background Options Reference"
+description: "All available background video and audio options, their credits, and how to configure them."
+---
+
+Background assets are downloaded automatically from YouTube on first use and cached locally. Subsequent runs use the cached files and do not require a network connection.
+
+<Note>
+  Background files are downloaded on first use. The initial run may take longer depending on your internet connection. Downloaded files are stored in the `assets/backgrounds/` directory.
+</Note>
+
+## Background Videos
+
+Set `background_video` in `[settings.background]` to one of the config keys below.
+
+| Config Key | Credit | YouTube Source |
+|---|---|---|
+| `minecraft` | bbswitzer | [youtube.com/watch?v=n_Dv4JMiwK8](https://www.youtube.com/watch?v=n_Dv4JMiwK8) |
+| `gta` | Achy Gaming | [youtube.com/watch?v=qGa9kWREOnE](https://www.youtube.com/watch?v=qGa9kWREOnE) |
+| `rocket-league` | Orbital Gameplay | [youtube.com/watch?v=2X9QGY__0II](https://www.youtube.com/watch?v=2X9QGY__0II) |
+| `motor-gta` | Achy Gaming | [youtube.com/watch?v=vw5L4xCPy9Q](https://www.youtube.com/watch?v=vw5L4xCPy9Q) |
+| `csgo-surf` | Aki | [youtube.com/watch?v=E-8JlyO59Io](https://www.youtube.com/watch?v=E-8JlyO59Io) |
+| `cluster-truck` | No Copyright Gameplay | [youtube.com/watch?v=uVKxtdMgJVU](https://www.youtube.com/watch?v=uVKxtdMgJVU) |
+| `minecraft-2` | Itslpsn | [youtube.com/watch?v=Pt5_GSKIWQM](https://www.youtube.com/watch?v=Pt5_GSKIWQM) |
+| `multiversus` | MKIceAndFire | [youtube.com/watch?v=66oK1Mktz6g](https://www.youtube.com/watch?v=66oK1Mktz6g) |
+| `fall-guys` | Throneful | [youtube.com/watch?v=oGSsgACIc6Q](https://www.youtube.com/watch?v=oGSsgACIc6Q) |
+| `steep` | joel | [youtube.com/watch?v=EnGiQrWBrko](https://www.youtube.com/watch?v=EnGiQrWBrko) |
+
+## Background Audio
+
+Set `background_audio` in `[settings.background]` to one of the config keys below.
+
+| Config Key | Credit | YouTube Source |
+|---|---|---|
+| `lofi` | Super Lofi World | [youtube.com/watch?v=LTphVIore3A](https://www.youtube.com/watch?v=LTphVIore3A) |
+| `lofi-2` | stompsPlaylist | [youtube.com/watch?v=BEXL80LS0-I](https://www.youtube.com/watch?v=BEXL80LS0-I) |
+| `chill-summer` | Mellow Vibes Radio | [youtube.com/watch?v=EZE8JagnBI8](https://www.youtube.com/watch?v=EZE8JagnBI8) |
+
+## Using a Random Background
+
+Set either `background_video` or `background_audio` to an empty string to have the bot pick a random option from the available pool on each run:
+
+```toml
+[settings.background]
+background_video = ""
+background_audio = ""
+```
+
+<Tip>
+  Using an empty string is a convenient way to add variety to your videos without manually changing config values between runs.
+</Tip>
+
+## Disabling Background Audio
+
+To generate videos without background music, set the volume to `0` rather than removing the key:
+
+```toml
+[settings.background]
+background_audio_volume = 0
+```
+
+## Adding Custom Backgrounds
+
+You can extend `utils/background_videos.json` and `utils/background_audios.json` with your own entries. Each video entry follows the format:
+
+```json
+"your-key": [
+  "https://www.youtube.com/watch?v=VIDEO_ID",
+  "output-filename.mp4",
+  "Credit Name",
+  "center"
+]
+```
+
+Each audio entry follows the format:
+
+```json
+"your-key": [
+  "https://www.youtube.com/watch?v=VIDEO_ID",
+  "output-filename.mp3",
+  "Credit Name"
+]
+```
+
+After adding an entry, use your new key as the `background_video` or `background_audio` value in `config.toml`.

@@ -1,0 +1,182 @@
+---
+title: "Troubleshooting"
+description: "Solutions to common errors and issues encountered when running Reddit Video Maker Bot."
+---
+
+<AccordionGroup>
+
+  <Accordion title='"Invalid credentials" error'>
+    The bot failed to authenticate with the Reddit API. This error is thrown by `prawcore` when your credentials are wrong or expired.
+
+    **Check the following in `config.toml`:**
+
+    - `client_id` — must be the ID from your Reddit SCRIPT app (12–30 characters)
+    - `client_secret` — must be the secret from the same app (20–40 characters)
+    - `username` — your Reddit account username, not your email
+    - `password` — your Reddit account password
+
+    ```toml
+    [reddit.creds]
+    client_id = "your_client_id_here"
+    client_secret = "your_client_secret_here"
+    username = "your_reddit_username"
+    password = "your_reddit_password"
+    ```
+
+    <Warning>
+      Make sure your Reddit app is of type **Script**, not "web app" or "installed app". Create or verify your app at [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps).
+    </Warning>
+
+    If you have 2FA enabled on your Reddit account, set `2fa = true` in the `[reddit.creds]` section.
+  </Accordion>
+
+  <Accordion title="TikTok sessionid expired">
+    The TikTok TTS API requires a valid session cookie. Sessions expire periodically and must be refreshed manually.
+
+    **How to get a new sessionid:**
+
+    1. Open [tiktok.com](https://www.tiktok.com) in your browser and log in.
+    2. Open browser developer tools (`F12`).
+    3. Go to **Application** → **Cookies** → `https://www.tiktok.com`.
+    4. Find the cookie named `sessionid` and copy its value.
+    5. Paste it into your `config.toml`:
+
+    ```toml
+    [settings.tts]
+    tiktok_sessionid = "your_new_sessionid_here"
+    ```
+
+    <Note>
+      The sessionid is a long alphanumeric string. Do not share it — it provides access to your TikTok account session.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Playwright not installed">
+    The bot uses Playwright to capture screenshots of Reddit posts. If Playwright's browser binaries are missing, the screenshot step will fail.
+
+    **Install Playwright browsers:**
+
+    ```bash
+    python -m playwright install
+    python -m playwright install-deps
+    ```
+
+    The second command installs system-level dependencies required by Chromium on Linux. On macOS and Windows this is generally not needed.
+
+    If `playwright` is not found, install it first via pip:
+
+    ```bash
+    pip install playwright
+    python -m playwright install
+    ```
+  </Accordion>
+
+  <Accordion title="FFmpeg not found">
+    FFmpeg is required for all video processing. If it is not on your system `PATH`, the bot will fail during video assembly.
+
+    **Option 1 — Auto-install (recommended):**
+
+    The bot ships with `ffmpeg_install.py` and calls it automatically at startup. If it did not install FFmpeg, run it manually:
+
+    ```bash
+    python utils/ffmpeg_install.py
+    ```
+
+    **Option 2 — Manual install:**
+
+    - **Ubuntu/Debian:** `sudo apt install ffmpeg`
+    - **macOS (Homebrew):** `brew install ffmpeg`
+    - **Windows:** Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add the `bin/` folder to your `PATH`.
+
+    After installing, verify FFmpeg is accessible:
+
+    ```bash
+    ffmpeg -version
+    ```
+  </Accordion>
+
+  <Accordion title='"Background video too short" error'>
+    The selected background video must be longer than the total audio duration plus a 180-second buffer. This error is raised in `get_start_and_end_times` when no valid clip window can be found.
+
+    **Solutions:**
+
+    - Switch to a different `background_video` in `config.toml` — some clips are longer than others.
+    - Reduce the number of comments per video by lowering `max_comment_length` or `min_comments`.
+    - In story mode, reduce `storymode_max_length`.
+    - Delete the cached background file from `assets/backgrounds/` and let the bot re-download a fresh copy (in case the local file is corrupt or truncated).
+
+    ```toml
+    [settings.background]
+    background_video = "minecraft"
+    ```
+  </Accordion>
+
+  <Accordion title="Python version error">
+    The bot enforces a specific Python version at startup. If you see a message about the wrong Python version, you are not running a supported release.
+
+    **Supported versions:** Python **3.10**, **3.11**, and **3.12**
+
+    Check your current version:
+
+    ```bash
+    python --version
+    ```
+
+    If you have multiple Python versions installed, be explicit:
+
+    ```bash
+    python3.11 main.py
+    ```
+
+    <Warning>
+      Python 3.13+ is not currently supported. The bot will exit immediately if run on an unsupported version.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Config not found or needs to be reconfigured">
+    If your `config.toml` is missing, incomplete, or contains invalid values, the bot will fail validation at startup.
+
+    **To reset a specific section:**
+
+    Delete the relevant lines from `config.toml` and rerun `python main.py`. The bot will re-prompt you to enter values for any missing required keys.
+
+    **To reset everything:**
+
+    ```bash
+    rm config.toml
+    python main.py
+    ```
+
+    This triggers the full interactive setup wizard again.
+
+    <Tip>
+      You can also copy `utils/.config.template.toml` to `config.toml` as a starting point and fill in your values manually.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="NSFW posts are being filtered out">
+    By default, the bot skips posts flagged as NSFW on Reddit. If your target subreddit contains NSFW content that you want to include, enable it explicitly:
+
+    ```toml
+    [settings]
+    allow_nsfw = true
+    ```
+
+    <Warning>
+      Only enable NSFW content if you are permitted to do so under the terms of the platforms you publish to.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Video already created — bot skips a post">
+    The bot tracks previously generated post IDs to avoid creating duplicate videos. If a post has already been processed, it will be skipped on subsequent runs.
+
+    **To regenerate a video for the same post:**
+
+    1. Locate the output file in the `results/` directory.
+    2. Delete the file corresponding to that Reddit post ID.
+    3. Rerun the bot.
+
+    Alternatively, specify a different `post_id` in `config.toml`, or use `random = true` to let the bot pick a fresh post automatically.
+  </Accordion>
+
+</AccordionGroup>

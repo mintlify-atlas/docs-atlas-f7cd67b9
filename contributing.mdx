@@ -1,0 +1,122 @@
+---
+title: "Contributing"
+description: "How to report bugs, suggest features, and submit code to Reddit Video Maker Bot."
+---
+
+All types of contributions are welcome — code, documentation, bug reports, and feature suggestions.
+
+<CardGroup cols={2}>
+  <Card title="GitHub Issues" icon="github" href="https://github.com/elebumm/RedditVideoMakerBot/issues">
+    Report bugs or suggest enhancements on GitHub.
+  </Card>
+  <Card title="Discord Server" icon="discord" href="https://discord.gg/qfQSx45xCV">
+    Ask questions and get help from the community.
+  </Card>
+</CardGroup>
+
+---
+
+## Reporting Bugs
+
+Before opening a new issue, search [existing issues](https://github.com/elebumm/RedditVideoMakerBot/issues) to check if your bug has already been reported.
+
+**Include the following in your bug report:**
+
+- Full stack trace (formatted as a code block)
+- Operating system and architecture (e.g. Windows 11 x64, Ubuntu 22.04 ARM)
+- Python version (`python --version`)
+- Steps to reproduce the issue
+- Your input and the actual output
+- Whether the issue is reproducible across multiple runs
+
+<Note>
+  Do not include your `tiktok_sessionid`, `elevenlabs_api_key`, or `openai_api_key` in bug reports. The bot automatically redacts these before printing config output in error messages.
+</Note>
+
+---
+
+## Suggesting Enhancements
+
+Enhancement suggestions are tracked as GitHub issues.
+
+**Before submitting:**
+
+- Check that the feature is not already covered by an existing configuration option — read the [config.toml reference](/reference/config-toml) first.
+- Search [existing issues](https://github.com/elebumm/RedditVideoMakerBot/issues) to avoid duplicates.
+
+**In your suggestion, include:**
+
+- A clear, descriptive title
+- The current behavior and what you expect instead
+- Why the enhancement would benefit the majority of users
+
+---
+
+## Submitting Code
+
+<Steps>
+  <Step title="Fork and clone the repository">
+    Create a fork of the repository to your personal GitHub account, then clone it locally.
+
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/RedditVideoMakerBot.git
+    cd RedditVideoMakerBot
+    ```
+  </Step>
+
+  <Step title="Branch from develop">
+    All contributions must branch from `develop`, not `master`.
+
+    ```bash
+    git checkout develop
+    git pull origin develop
+    git checkout -b feat/your-feature-name
+    ```
+  </Step>
+
+  <Step title="Install dependencies and verify setup">
+    Install requirements and confirm the bot runs before making changes.
+
+    ```bash
+    pip install -r requirements.txt
+    python main.py
+    ```
+  </Step>
+
+  <Step title="Make your changes with meaningful commits">
+    Follow the commit message format: `type: short explanation`
+
+    | Type | When to use |
+    |---|---|
+    | `feat` | A new feature |
+    | `fix` | A bug fix |
+    | `docs` | Documentation or comment changes only |
+    | `style` | Formatting changes that do not affect logic |
+    | `refactor` | Code restructuring without behavior change |
+    | `chore` | Config, workflow, or tooling updates |
+
+    **Example commits:**
+
+    ```
+    feat: add support for custom background video paths
+    fix: handle empty post_id in config gracefully
+    docs: update TikTok voice list in voice-options
+    ```
+
+    Use `git pull --rebase` when syncing with upstream to keep history clean.
+  </Step>
+
+  <Step title="Open a pull request into develop">
+    Target the `develop` branch — not `master`. In your PR description:
+
+    - Reference any related issues using `Fixes #123`
+    - Describe what changed and why
+    - Note if you are using a non-standard Python version
+  </Step>
+</Steps>
+
+---
+
+## Improving the Documentation
+
+Documentation source lives in a separate repository: [github.com/LukaHietala/RedditVideoMakerBot-website](https://github.com/LukaHietala/RedditVideoMakerBot-website). Submit documentation pull requests there.

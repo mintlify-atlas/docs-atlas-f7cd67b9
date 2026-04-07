@@ -1,0 +1,227 @@
+---
+title: "Backgrounds"
+description: "Configure background video and audio for your videos, including available options, download behavior, and thumbnail generation."
+---
+
+The `[settings.background]` block controls which gameplay footage and background music play behind the Reddit content. Background files are downloaded automatically from YouTube on first use using `yt-dlp` and cached in `assets/backgrounds/`.
+
+---
+
+## How backgrounds are downloaded
+
+The bot checks whether the selected background file already exists in `assets/backgrounds/video/` or `assets/backgrounds/audio/` before starting each run. If the file is missing, it downloads it from YouTube automatically using `yt-dlp`.
+
+<Note>
+  Background video and audio files are downloaded only once. Subsequent runs reuse the cached files. The download may take a few minutes the first time depending on your connection speed.
+</Note>
+
+After downloading, the bot clips a random segment from the background video that matches the length of the generated voiceover. The segment always starts at least 180 seconds into the video to avoid intros. Background video is downloaded at the best available quality up to 1080p MP4.
+
+---
+
+## [settings.background] reference
+
+<ParamField path="background_video" type="string" default="minecraft">
+  The gameplay footage to use as the video background. Set to an empty string (`""`) to have the bot pick a random option each run.
+
+  **Options:** `minecraft`, `gta`, `rocket-league`, `motor-gta`, `csgo-surf`, `cluster-truck`, `minecraft-2`, `multiversus`, `fall-guys`, `steep`, `""`
+
+  **Default:** `minecraft`
+
+  **Example:** `rocket-league`
+</ParamField>
+
+<ParamField path="background_audio" type="string" default="lofi">
+  The background music track to mix into the video. Set to an empty string (`""`) to have the bot pick a random option each run.
+
+  **Options:** `lofi`, `lofi-2`, `chill-summer`, `""`
+
+  **Default:** `lofi`
+
+  **Example:** `chill-summer`
+</ParamField>
+
+<ParamField path="background_audio_volume" type="float" default="0.15">
+  Volume of the background audio track relative to the TTS voiceover. `0` disables background audio entirely. `1` plays it at full volume.
+
+  - Minimum: `0`
+  - Maximum: `1`
+
+  **Default:** `0.15`
+
+  **Example:** `0.05`
+</ParamField>
+
+<ParamField path="enable_extra_audio" type="boolean" default="false">
+  When `true`, the bot renders a second copy of the video without background audio and saves it to a separate folder. Useful for uploading versions with and without music.
+
+  **Options:** `true`, `false`
+
+  **Default:** `false`
+</ParamField>
+
+<ParamField path="background_thumbnail" type="boolean" default="false">
+  When `true`, the bot generates a thumbnail image for the video. You must place a `thumbnail.png` file in the `assets/backgrounds/` directory before running.
+
+  **Options:** `true`, `false`
+
+  **Default:** `false`
+</ParamField>
+
+<ParamField path="background_thumbnail_font_family" type="string" default="arial">
+  Font family used for text rendered onto the thumbnail.
+
+  **Default:** `arial`
+</ParamField>
+
+<ParamField path="background_thumbnail_font_size" type="integer" default="96">
+  Font size in pixels for text rendered onto the thumbnail.
+
+  **Default:** `96`
+</ParamField>
+
+<ParamField path="background_thumbnail_font_color" type="string" default="255,255,255">
+  Font color for the thumbnail text in `R,G,B` format.
+
+  **Default:** `255,255,255`
+
+  **Example:** `255,255,255` (white)
+</ParamField>
+
+---
+
+## Available background videos
+
+Each option is downloaded from YouTube and cached locally. The credit field identifies the original content creator.
+
+<AccordionGroup>
+  <Accordion title="minecraft">
+    **File:** `parkour.mp4`
+
+    **Creator:** bbswitzer
+  </Accordion>
+  <Accordion title="minecraft-2">
+    **File:** `minecraft-2.mp4`
+
+    **Creator:** Itslpsn
+  </Accordion>
+  <Accordion title="gta">
+    **File:** `gta-stunt-race.mp4`
+
+    **Creator:** Achy Gaming
+  </Accordion>
+  <Accordion title="motor-gta">
+    **File:** `bike-parkour-gta.mp4`
+
+    **Creator:** Achy Gaming
+  </Accordion>
+  <Accordion title="rocket-league">
+    **File:** `rocket_league.mp4`
+
+    **Creator:** Orbital Gameplay
+  </Accordion>
+  <Accordion title="csgo-surf">
+    **File:** `csgo-surf.mp4`
+
+    **Creator:** Aki
+  </Accordion>
+  <Accordion title="cluster-truck">
+    **File:** `cluster_truck.mp4`
+
+    **Creator:** No Copyright Gameplay
+  </Accordion>
+  <Accordion title="multiversus">
+    **File:** `multiversus.mp4`
+
+    **Creator:** MKIceAndFire
+  </Accordion>
+  <Accordion title="fall-guys">
+    **File:** `fall-guys.mp4`
+
+    **Creator:** Throneful
+  </Accordion>
+  <Accordion title="steep">
+    **File:** `steep.mp4`
+
+    **Creator:** joel
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Available background audio tracks
+
+<AccordionGroup>
+  <Accordion title="lofi">
+    **File:** `lofi.mp3`
+
+    **Creator:** Super Lofi World
+  </Accordion>
+  <Accordion title="lofi-2">
+    **File:** `lofi-2.mp3`
+
+    **Creator:** stompsPlaylist
+  </Accordion>
+  <Accordion title="chill-summer">
+    **File:** `chill-summer.mp3`
+
+    **Creator:** Mellow Vibes Radio
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Background length requirements
+
+The bot picks a random segment from the background video to match the length of the generated voiceover. To avoid intros and outros, it starts the segment at least 180 seconds (3 minutes) into the clip. If the background video is not long enough to accommodate the voiceover plus the 180-second offset, the bot halves the offset and retries.
+
+<Warning>
+  If your background video is too short for the generated voiceover, the bot raises an error: `Your background is too short for this video length`. Use a longer background or shorten the video by reducing `max_comment_length` or `storymode_max_length`.
+</Warning>
+
+---
+
+## Complete background config example
+
+```toml config.toml
+[settings.background]
+background_video = "minecraft"
+background_audio = "lofi"
+background_audio_volume = 0.15
+enable_extra_audio = false
+background_thumbnail = false
+background_thumbnail_font_family = "arial"
+background_thumbnail_font_size = 96
+background_thumbnail_font_color = "255,255,255"
+```
+
+---
+
+## Adding custom backgrounds via the GUI
+
+The bot ships with a local Flask web interface for managing settings.
+
+<Steps>
+  <Step title="Launch the GUI">
+    Run the GUI server from the project root:
+
+    ```bash
+    python GUI.py
+    ```
+
+    Open your browser to `http://localhost:4000`.
+  </Step>
+  <Step title="Navigate to Backgrounds">
+    In the sidebar, click **Backgrounds**. The page lists all currently registered video and audio options.
+  </Step>
+  <Step title="Add a custom background">
+    Paste a YouTube URL into the **Add background video** or **Add background audio** field. The GUI writes the entry to `utils/background_videos.json` or `utils/background_audios.json` and downloads the file to `assets/backgrounds/` automatically.
+  </Step>
+  <Step title="Select the new background">
+    Update `background_video` or `background_audio` in `config.toml` to use the new key, then run `python main.py` as usual.
+  </Step>
+</Steps>
+
+<Tip>
+  You can also edit `utils/background_videos.json` and `utils/background_audios.json` directly to add or remove entries. Each video entry is a four-element array: `[youtube_url, filename, creator_name, position]`. Each audio entry is a three-element array: `[youtube_url, filename, creator_name]`.
+</Tip>

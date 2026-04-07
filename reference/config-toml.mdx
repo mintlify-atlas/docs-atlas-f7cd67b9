@@ -1,0 +1,408 @@
+---
+title: "config.toml Reference"
+description: "Complete reference for every configuration key in config.toml, grouped by section."
+---
+
+A `config.toml` file in the project root controls all bot behavior. On first run, the bot will prompt you to fill in required values interactively and write them to `config.toml`.
+
+## Full Example
+
+```toml
+[reddit.creds]
+client_id = "fFAGRNJru1FTz70BzhT3Zg"
+client_secret = "fFAGRNJru1FTz70BzhT3Zg"
+username = "JasonLovesDoggo"
+password = "yourpassword"
+2fa = false
+
+[reddit.thread]
+random = false
+subreddit = "AskReddit"
+post_id = ""
+max_comment_length = 500
+min_comment_length = 1
+post_lang = ""
+min_comments = 20
+blocked_words = ""
+
+[ai]
+ai_similarity_enabled = false
+ai_similarity_keywords = "Elon Musk, Twitter, Stocks"
+
+[settings]
+allow_nsfw = false
+theme = "dark"
+times_to_run = 1
+opacity = 0.9
+storymode = false
+storymodemethod = 1
+storymode_max_length = 1000
+resolution_w = 1080
+resolution_h = 1920
+zoom = 1
+channel_name = "Reddit Tales"
+
+[settings.background]
+background_video = "minecraft"
+background_audio = "lofi"
+background_audio_volume = 0.15
+enable_extra_audio = false
+background_thumbnail = false
+background_thumbnail_font_family = "arial"
+background_thumbnail_font_size = 96
+background_thumbnail_font_color = "255,255,255"
+
+[settings.tts]
+voice_choice = "tiktok"
+random_voice = true
+elevenlabs_voice_name = "Bella"
+elevenlabs_api_key = ""
+aws_polly_voice = "Matthew"
+streamlabs_polly_voice = "Matthew"
+tiktok_voice = "en_us_001"
+tiktok_sessionid = ""
+python_voice = "1"
+py_voice_num = "2"
+silence_duration = 0.3
+no_emojis = false
+openai_api_url = "https://api.openai.com/v1/"
+openai_api_key = ""
+openai_voice_name = "alloy"
+openai_model = "tts-1"
+```
+
+---
+
+## `[reddit.creds]`
+
+Reddit API credentials for your SCRIPT-type app. Create one at [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps).
+
+<ParamField path="client_id" type="string" required>
+  The client ID of your Reddit app. Must be 12–30 characters. Only printable ASCII characters are valid.
+
+  **Example:** `fFAGRNJru1FTz70BzhT3Zg`
+</ParamField>
+
+<ParamField path="client_secret" type="string" required>
+  The client secret of your Reddit app. Must be 20–40 characters.
+
+  **Example:** `fFAGRNJru1FTz70BzhT3Zg`
+</ParamField>
+
+<ParamField path="username" type="string" required>
+  Your Reddit account username. Must be 3–20 characters, letters, numbers, hyphens, and underscores only.
+
+  **Example:** `JasonLovesDoggo`
+</ParamField>
+
+<ParamField path="password" type="string" required>
+  Your Reddit account password. Must be at least 8 characters.
+
+  **Example:** `yourpassword`
+</ParamField>
+
+<ParamField path="2fa" type="boolean" default="false">
+  Set to `true` if your Reddit account has two-factor authentication enabled.
+
+  **Options:** `true`, `false`
+</ParamField>
+
+---
+
+## `[reddit.thread]`
+
+Controls which Reddit thread is used and how comments are filtered.
+
+<ParamField path="random" type="boolean" default="false">
+  When `true`, a random post is selected from the configured subreddit. When `false`, the bot will prompt for a thread URL or use `post_id`.
+
+  **Options:** `true`, `false`
+</ParamField>
+
+<ParamField path="subreddit" type="string" required>
+  The subreddit name (not the full URL) to pull posts from. Combine multiple subreddits with `+` and no spaces.
+
+  **Example:** `AskReddit+Redditdev`
+</ParamField>
+
+<ParamField path="post_id" type="string" default='""'>
+  A specific Reddit post ID to use. Leave empty to pick automatically. Separate multiple IDs with `+`.
+
+  **Example:** `urdtfx`
+</ParamField>
+
+<ParamField path="max_comment_length" type="integer" default="500">
+  Maximum number of characters a comment may have to be included. Range: 10–10,000.
+
+  **Example:** `500`
+</ParamField>
+
+<ParamField path="min_comment_length" type="integer" default="1">
+  Minimum number of characters a comment must have to be included. Range: 0–10,000.
+
+  **Example:** `50`
+</ParamField>
+
+<ParamField path="post_lang" type="string" default='""'>
+  Language code to translate post content into. Leave empty to skip translation. Supports all Google Translate language codes (e.g. `es-cr`, `de`, `ja`).
+
+  **Example:** `es-cr`
+</ParamField>
+
+<ParamField path="min_comments" type="integer" default="20">
+  Minimum number of comments a post must have to be selected. Must be at least 10.
+
+  **Example:** `29`
+</ParamField>
+
+<ParamField path="blocked_words" type="string" default='""'>
+  Comma-separated list of words or phrases. Posts and comments containing any of these will be skipped entirely.
+
+  **Example:** `nsfw, spoiler, politics`
+</ParamField>
+
+---
+
+## `[ai]`
+
+Optional AI-powered post filtering using keyword similarity.
+
+<ParamField path="ai_similarity_enabled" type="boolean" default="false">
+  When `true`, threads fetched from Reddit are ranked by their semantic similarity to the keywords defined in `ai_similarity_keywords`.
+
+  **Options:** `true`, `false`
+</ParamField>
+
+<ParamField path="ai_similarity_keywords" type="string">
+  Comma-separated list of keywords or phrases used to rank posts by similarity when `ai_similarity_enabled` is `true`.
+
+  **Example:** `Elon Musk, Twitter, Stocks`
+</ParamField>
+
+---
+
+## `[settings]`
+
+General video generation settings.
+
+<ParamField path="allow_nsfw" type="boolean" default="false" required>
+  Whether to allow NSFW-flagged posts to be selected.
+
+  **Options:** `true`, `false`
+</ParamField>
+
+<ParamField path="theme" type="string" default="dark" required>
+  The visual theme for Reddit screenshot overlays. Story mode also supports `transparent`.
+
+  **Options:** `dark`, `light`, `transparent`
+</ParamField>
+
+<ParamField path="times_to_run" type="integer" default="1" required>
+  Number of videos to generate in one run. Must be at least 1.
+
+  **Example:** `4`
+</ParamField>
+
+<ParamField path="opacity" type="float" default="0.9" required>
+  Opacity of the comment overlay on top of the background video. Range: 0.0–1.0.
+
+  **Example:** `0.8`
+</ParamField>
+
+<ParamField path="storymode" type="boolean" default="false">
+  When `true`, only the post title and body are read aloud — no comments. Ideal for storytelling subreddits.
+
+  **Options:** `true`, `false`
+</ParamField>
+
+<ParamField path="storymodemethod" type="integer" default="1">
+  Visual style for story mode. `0` = single static image for the whole video. `1` = animated, scrolling display.
+
+  **Options:** `0`, `1`
+</ParamField>
+
+<ParamField path="storymode_max_length" type="integer" default="1000">
+  Maximum character length of post content used in story mode. Approximately 200 characters ≈ 50 seconds.
+
+  **Example:** `1000`
+</ParamField>
+
+<ParamField path="resolution_w" type="integer" default="1080" required>
+  Width of the output video in pixels.
+
+  **Example:** `1440`
+</ParamField>
+
+<ParamField path="resolution_h" type="integer" default="1920" required>
+  Height of the output video in pixels.
+
+  **Example:** `2560`
+</ParamField>
+
+<ParamField path="zoom" type="float" default="1">
+  Browser zoom level used when capturing Reddit screenshots. Increase to make text appear larger. Range: 0.1–2.0.
+
+  **Example:** `1.1`
+</ParamField>
+
+<ParamField path="channel_name" type="string" default="Reddit Tales">
+  Channel name displayed in the video.
+
+  **Example:** `Reddit Stories`
+</ParamField>
+
+---
+
+## `[settings.background]`
+
+Controls background video and audio assets.
+
+<ParamField path="background_video" type="string" default="minecraft">
+  The background video clip to use. Set to `""` to choose randomly from all available options. See [Background Options](/reference/background-options) for the full list.
+
+  **Options:** `minecraft`, `gta`, `rocket-league`, `motor-gta`, `csgo-surf`, `cluster-truck`, `minecraft-2`, `multiversus`, `fall-guys`, `steep`, `""`
+</ParamField>
+
+<ParamField path="background_audio" type="string" default="lofi">
+  The background music track to use. Set to `""` to choose randomly. See [Background Options](/reference/background-options) for the full list.
+
+  **Options:** `lofi`, `lofi-2`, `chill-summer`, `""`
+</ParamField>
+
+<ParamField path="background_audio_volume" type="float" default="0.15">
+  Volume level for background music. Set to `0` to disable background audio entirely. Range: 0.0–1.0.
+
+  **Example:** `0.05`
+</ParamField>
+
+<ParamField path="enable_extra_audio" type="boolean" default="false">
+  When `true`, an additional copy of the video is rendered without background audio and saved to a separate folder.
+
+  **Options:** `true`, `false`
+</ParamField>
+
+<ParamField path="background_thumbnail" type="boolean" default="false">
+  When `true`, generates a thumbnail image for the video. Requires a `thumbnail.png` in `assets/backgrounds/`.
+
+  **Options:** `true`, `false`
+</ParamField>
+
+<ParamField path="background_thumbnail_font_family" type="string" default="arial">
+  Font family used for text on the generated thumbnail.
+
+  **Example:** `arial`
+</ParamField>
+
+<ParamField path="background_thumbnail_font_size" type="integer" default="96">
+  Font size in pixels for thumbnail text.
+
+  **Example:** `96`
+</ParamField>
+
+<ParamField path="background_thumbnail_font_color" type="string" default="255,255,255">
+  Font color for thumbnail text in comma-separated RGB format.
+
+  **Example:** `255,255,255`
+</ParamField>
+
+---
+
+## `[settings.tts]`
+
+Text-to-speech engine configuration.
+
+<ParamField path="voice_choice" type="string" default="tiktok" required>
+  The TTS platform to use for generating speech.
+
+  **Options:** `tiktok`, `elevenlabs`, `streamlabspolly`, `googletranslate`, `awspolly`, `pyttsx`, `OpenAI`
+</ParamField>
+
+<ParamField path="random_voice" type="boolean" default="true" required>
+  When `true`, a random voice is chosen for each comment instead of using the configured voice.
+
+  **Options:** `true`, `false`
+</ParamField>
+
+<ParamField path="elevenlabs_voice_name" type="string" default="Bella" required>
+  Voice name to use when `voice_choice` is `elevenlabs`. See [Voice Options](/reference/voice-options) for all available names.
+
+  **Options:** `Adam`, `Antoni`, `Arnold`, `Bella`, `Domi`, `Elli`, `Josh`, `Rachel`, `Sam`
+</ParamField>
+
+<ParamField path="elevenlabs_api_key" type="string">
+  Your ElevenLabs API key. Required when `voice_choice` is `elevenlabs`.
+
+  **Example:** `21f13f91f54d741e2ae27d2ab1b99d59`
+</ParamField>
+
+<ParamField path="aws_polly_voice" type="string" default="Matthew" required>
+  The voice ID to use when `voice_choice` is `awspolly`.
+
+  **Example:** `Matthew`
+</ParamField>
+
+<ParamField path="streamlabs_polly_voice" type="string" default="Matthew" required>
+  The voice ID to use when `voice_choice` is `streamlabspolly`.
+
+  **Example:** `Matthew`
+</ParamField>
+
+<ParamField path="tiktok_voice" type="string" default="en_us_001">
+  The voice ID to use when `voice_choice` is `tiktok` and `random_voice` is `false`. See [Voice Options](/reference/voice-options) for all available IDs.
+
+  **Example:** `en_us_006`
+</ParamField>
+
+<ParamField path="tiktok_sessionid" type="string">
+  Your TikTok session cookie value. Required when `voice_choice` is `tiktok`. See [Troubleshooting](/troubleshooting) for how to obtain it.
+
+  **Example:** `c76bcc3a7625abcc27b508c7db457ff1`
+</ParamField>
+
+<ParamField path="python_voice" type="string" default="1" required>
+  Index of the system TTS voice when `voice_choice` is `pyttsx`. Run `ptt.py` to list available voices. Starts from zero.
+
+  **Example:** `1`
+</ParamField>
+
+<ParamField path="py_voice_num" type="string" default="2" required>
+  The total number of system TTS voices installed. Windows comes with 2 pre-installed.
+
+  **Example:** `2`
+</ParamField>
+
+<ParamField path="silence_duration" type="float" default="0.3">
+  Pause duration in seconds inserted between TTS segments.
+
+  **Example:** `0.1`
+</ParamField>
+
+<ParamField path="no_emojis" type="boolean" default="false" required>
+  When `true`, emojis are stripped from comment text before being passed to the TTS engine.
+
+  **Options:** `true`, `false`
+</ParamField>
+
+<ParamField path="openai_api_url" type="string" default="https://api.openai.com/v1/">
+  The base API endpoint for OpenAI TTS. Override this to use a compatible third-party endpoint.
+
+  **Example:** `https://api.openai.com/v1/`
+</ParamField>
+
+<ParamField path="openai_api_key" type="string">
+  Your OpenAI API key. Required when `voice_choice` is `OpenAI`.
+
+  **Example:** `sk-abc123def456...`
+</ParamField>
+
+<ParamField path="openai_voice_name" type="string" default="alloy" required>
+  The voice to use for OpenAI TTS generation.
+
+  **Options:** `alloy`, `ash`, `coral`, `echo`, `fable`, `onyx`, `nova`, `sage`, `shimmer`, `af_heart`
+</ParamField>
+
+<ParamField path="openai_model" type="string" default="tts-1" required>
+  The OpenAI model variant to use for TTS generation.
+
+  **Options:** `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts`
+</ParamField>

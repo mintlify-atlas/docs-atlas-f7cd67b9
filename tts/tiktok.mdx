@@ -1,0 +1,146 @@
+---
+title: "TikTok TTS"
+description: "Set up the TikTok Text-to-Speech engine, obtain your session ID from browser cookies, and choose from 40+ voices including Disney characters."
+---
+
+The TikTok TTS engine calls TikTok's internal speech API (`api16-normal-c-useast1a.tiktokv.com`) using your session cookie for authentication. No paid account or developer key is needed — a regular logged-in TikTok account is all that is required.
+
+<Warning>
+  Your `sessionid` cookie expires periodically. If TTS generation starts failing, revisit the steps below to grab a fresh session ID.
+</Warning>
+
+## Setup
+
+<Steps>
+  <Step title="Log in to TikTok in your browser">
+    Open [tiktok.com](https://www.tiktok.com) and sign in to your account.
+  </Step>
+  <Step title="Open browser developer tools">
+    Press `F12` (or `Cmd+Option+I` on macOS) to open DevTools, then navigate to the **Application** tab (Chrome/Edge) or **Storage** tab (Firefox).
+  </Step>
+  <Step title="Find the sessionid cookie">
+    Under **Cookies → https://www.tiktok.com**, locate the cookie named `sessionid`. Copy its **Value**.
+  </Step>
+  <Step title="Add the session ID to your config">
+    Paste the value into `.config.toml`:
+
+    ```toml
+    [settings.tts]
+    voice_choice       = "tiktok"
+    tiktok_sessionid   = "c76bcc3a7625abcc27b508c7db457ff1"
+    tiktok_voice       = "en_us_001"
+    random_voice       = false
+    ```
+  </Step>
+</Steps>
+
+## Config Reference
+
+<ParamField path="voice_choice" type="string" required>
+  Must be set to `"tiktok"` to activate this engine.
+</ParamField>
+
+<ParamField path="tiktok_sessionid" type="string" required>
+  Your TikTok `sessionid` cookie value. The engine injects this as a `Cookie` header on every request.
+
+  Example: `"c76bcc3a7625abcc27b508c7db457ff1"`
+</ParamField>
+
+<ParamField path="tiktok_voice" type="string" default="en_us_001">
+  The voice code to use when `random_voice` is `false`. If this key is absent from the config, the API selects the most fitting voice automatically.
+
+  Example: `"en_us_006"`
+</ParamField>
+
+<ParamField path="random_voice" type="bool" default="true">
+  When `true`, a random English voice is chosen from `eng_voices` for each comment. Disney and vocal voices are excluded from random selection.
+</ParamField>
+
+<Note>
+  The TikTok engine accepts a maximum of **200 characters** per API request. Longer comments are automatically split by `TTSEngine.split_post()` and re-joined with a silence gap.
+</Note>
+
+## Available Voices
+
+<Tabs>
+  <Tab title="English">
+    | Voice Code | Description |
+    |---|---|
+    | `en_au_001` | English AU — Female |
+    | `en_au_002` | English AU — Male |
+    | `en_uk_001` | English UK — Male 1 |
+    | `en_uk_003` | English UK — Male 2 |
+    | `en_us_001` | English US — Female (Int. 1) |
+    | `en_us_002` | English US — Female (Int. 2) |
+    | `en_us_006` | English US — Male 1 |
+    | `en_us_007` | English US — Male 2 |
+    | `en_us_009` | English US — Male 3 |
+    | `en_us_010` | English US — Male 4 |
+    | `en_male_narration` | Narrator |
+    | `en_male_funny` | Funny |
+    | `en_female_emotional` | Peaceful |
+    | `en_male_cody` | Serious |
+  </Tab>
+  <Tab title="Non-English">
+    | Voice Code | Description |
+    |---|---|
+    | `fr_001` | French — Male 1 |
+    | `fr_002` | French — Male 2 |
+    | `de_001` | German — Female |
+    | `de_002` | German — Male |
+    | `es_002` | Spanish — Male |
+    | `it_male_m18` | Italian — Male |
+    | `es_mx_002` | Spanish MX — Male |
+    | `br_001` | Portuguese BR — Female 1 |
+    | `br_003` | Portuguese BR — Female 2 |
+    | `br_004` | Portuguese BR — Female 3 |
+    | `br_005` | Portuguese BR — Male |
+    | `id_001` | Indonesian — Female |
+    | `jp_001` | Japanese — Female 1 |
+    | `jp_003` | Japanese — Female 2 |
+    | `jp_005` | Japanese — Female 3 |
+    | `jp_006` | Japanese — Male |
+    | `kr_002` | Korean — Male 1 |
+    | `kr_003` | Korean — Female |
+    | `kr_004` | Korean — Male 2 |
+  </Tab>
+  <Tab title="Disney / Character">
+    | Voice Code | Description |
+    |---|---|
+    | `en_us_ghostface` | Ghost Face |
+    | `en_us_chewbacca` | Chewbacca |
+    | `en_us_c3po` | C3PO |
+    | `en_us_stitch` | Stitch |
+    | `en_us_stormtrooper` | Stormtrooper |
+    | `en_us_rocket` | Rocket |
+    | `en_female_madam_leota` | Madame Leota |
+    | `en_male_ghosthost` | Ghost Host |
+    | `en_male_pirate` | Pirate |
+  </Tab>
+  <Tab title="Vocal / Singing">
+    | Voice Code | Description |
+    |---|---|
+    | `en_female_f08_salut_damour` | Alto |
+    | `en_male_m03_lobby` | Tenor |
+    | `en_male_m03_sunshine_soon` | Sunshine Soon |
+    | `en_female_f08_warmy_breeze` | Warmy Breeze |
+    | `en_female_ht_f08_glorious` | Glorious |
+    | `en_male_sing_funny_it_goes_up` | It Goes Up |
+    | `en_male_m2_xhxs_m03_silly` | Chipmunk |
+    | `en_female_ht_f08_wonderful_world` | Dramatic |
+  </Tab>
+</Tabs>
+
+<Tip>
+  The `random_voice` option only randomises across the **English** voice set (`eng_voices`). To use a Disney or vocal voice, set `random_voice = false` and specify the voice code explicitly in `tiktok_voice`.
+</Tip>
+
+## Error Codes
+
+The TikTok API returns a `status_code` field in each response. The engine raises a `TikTokTTSException` on non-zero codes:
+
+| Code | Reason |
+|---|---|
+| `1` | Incorrect `aid` value (internal API issue) |
+| `2` | Text too long (over 200 characters) |
+| `4` | Specified voice does not exist |

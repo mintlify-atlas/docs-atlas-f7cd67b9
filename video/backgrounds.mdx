@@ -1,0 +1,113 @@
+---
+title: "Background Videos & Audio"
+description: "Choose and configure the gameplay footage and music that plays behind your Reddit narration."
+---
+
+Every generated video uses two layered background assets: a **gameplay video** and an **ambient audio track**. Both are downloaded automatically from YouTube the first time they are needed and cached locally so subsequent runs are instant.
+
+## How Assets Are Downloaded and Cached
+
+When the pipeline runs, it checks whether the selected background file already exists under `assets/backgrounds/`. If not, **yt-dlp** downloads it from YouTube.
+
+- Videos are saved to `assets/backgrounds/video/`
+- Audio tracks are saved to `assets/backgrounds/audio/`
+
+Files are named `<credit>-<filename>` (e.g. `bbswitzer-parkour.mp4`) so that each source channel has its own cache entry.
+
+<Note>
+  The download only happens once per background option. You do not need internet access on subsequent runs as long as the cached file is present.
+</Note>
+
+## Background Video Options
+
+Set `background_video` in your config to one of the keys below. Leaving it empty or using an unsupported value causes a random option to be selected each run.
+
+```toml
+[settings.background]
+background_video = "minecraft"
+```
+
+| Key | Filename | Credit |
+|---|---|---|
+| `motor-gta` | `bike-parkour-gta.mp4` | Achy Gaming |
+| `rocket-league` | `rocket_league.mp4` | Orbital Gameplay |
+| `minecraft` | `parkour.mp4` | bbswitzer |
+| `gta` | `gta-stunt-race.mp4` | Achy Gaming |
+| `csgo-surf` | `csgo-surf.mp4` | Aki |
+| `cluster-truck` | `cluster_truck.mp4` | No Copyright Gameplay |
+| `minecraft-2` | `minecraft-2.mp4` | Itslpsn |
+| `multiversus` | `multiversus.mp4` | MKIceAndFire |
+| `fall-guys` | `fall-guys.mp4` | Throneful |
+| `steep` | `steep.mp4` | joel |
+
+Videos are downloaded at the best available quality up to 1080p MP4. A random time interval (skipping the first 180 seconds to avoid intros) is cropped to match the exact length of your video.
+
+## Background Audio Options
+
+Set `background_audio` to one of the keys below. Leaving it empty or using an unsupported value selects a random option.
+
+```toml
+[settings.background]
+background_audio = "lofi"
+```
+
+| Key | Filename | Credit |
+|---|---|---|
+| `lofi` | `lofi.mp3` | Super Lofi World |
+| `lofi-2` | `lofi-2.mp3` | stompsPlaylist |
+| `chill-summer` | `chill-summer.mp3` | Mellow Vibes Radio |
+
+## Audio Volume
+
+`background_audio_volume` controls how loud the background music is relative to the TTS narration. The value is a float between `0` and `1`.
+
+```toml
+[settings.background]
+background_audio_volume = 0.15   # default: 15% volume
+```
+
+Setting this to `0` disables background audio entirely and skips the audio download step.
+
+## Extra Audio Version
+
+When `enable_extra_audio` is `true`, the pipeline renders a **second copy** of the video with no background music. This is useful for uploading a clean version or adding your own music in post-production.
+
+```toml
+[settings.background]
+enable_extra_audio = true
+```
+
+The secondary render is saved to:
+
+```
+results/<subreddit>/OnlyTTS/<thread-title>.mp4
+```
+
+<Note>
+  `enable_extra_audio` only has an effect when `background_audio_volume` is greater than `0`. If the volume is already `0`, both versions would be identical, so only one is rendered.
+</Note>
+
+## Thumbnail Generation
+
+The bot can generate a thumbnail image alongside each video. Place a `thumbnail.png` file in the `assets/backgrounds/` directory to use as the template, then enable the feature in config.
+
+```toml
+[settings.background]
+background_thumbnail            = true
+background_thumbnail_font_family = "arial"
+background_thumbnail_font_size   = 96
+background_thumbnail_font_color  = "255,255,255"
+```
+
+| Setting | Description | Default |
+|---|---|---|
+| `background_thumbnail` | Enable thumbnail generation | `false` |
+| `background_thumbnail_font_family` | Font family for the title text | `"arial"` |
+| `background_thumbnail_font_size` | Font size in pixels | `96` |
+| `background_thumbnail_font_color` | Text color in `R,G,B` format | `"255,255,255"` |
+
+Thumbnails are saved to `results/<subreddit>/thumbnails/` and also temporarily stored at `assets/temp/<thread_id>/thumbnail.png` during rendering.
+
+<Tip>
+  The thumbnail template is stretched vertically around a 1-pixel middle slice to accommodate longer titles without distorting the design. Keep important visual elements in the top and bottom thirds of your template image.
+</Tip>

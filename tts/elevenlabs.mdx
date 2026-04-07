@@ -1,0 +1,78 @@
+---
+title: "ElevenLabs TTS"
+description: "Configure ElevenLabs as your TTS engine, set your API key, and choose from nine pre-built voices or enable random voice selection."
+---
+
+ElevenLabs produces the most natural-sounding speech of all the engines supported by RedditVideoMakerBot. It uses the `eleven_multilingual_v1` model and the official `elevenlabs` Python SDK. The engine supports up to **2,500 characters** per request.
+
+## Setup
+
+<Steps>
+  <Step title="Create an ElevenLabs account">
+    Sign up at [elevenlabs.io](https://elevenlabs.io). A free-tier account gives a limited monthly character quota.
+  </Step>
+  <Step title="Copy your API key">
+    Go to your profile settings and copy the API key shown under **API Key**.
+  </Step>
+  <Step title="Add the key to your config">
+    ```toml
+    [settings.tts]
+    voice_choice          = "elevenlabs"
+    elevenlabs_api_key    = "21f13f91f54d741e2ae27d2ab1b99d59"
+    elevenlabs_voice_name = "Bella"
+    random_voice          = false
+    ```
+  </Step>
+</Steps>
+
+## Config Reference
+
+<ParamField path="voice_choice" type="string" required>
+  Must be set to `"elevenlabs"` to activate this engine.
+</ParamField>
+
+<ParamField path="elevenlabs_api_key" type="string" required>
+  Your ElevenLabs API key. The engine raises a `ValueError` at startup if this is not set.
+
+  Example: `"21f13f91f54d741e2ae27d2ab1b99d59"`
+</ParamField>
+
+<ParamField path="elevenlabs_voice_name" type="string" default="Bella">
+  The pre-built voice to use when `random_voice` is `false`. The value is capitalised automatically before the API call, so `"bella"` and `"Bella"` are equivalent.
+
+  Options: `Adam`, `Antoni`, `Arnold`, `Bella`, `Domi`, `Elli`, `Josh`, `Rachel`, `Sam`
+</ParamField>
+
+<ParamField path="random_voice" type="bool" default="true">
+  When `true`, a random voice is selected from **all voices available on your account** via the ElevenLabs API (`client.voices.get_all()`). This includes any custom or cloned voices you have added.
+</ParamField>
+
+## Available Pre-built Voices
+
+| Name | Gender |
+|---|---|
+| Adam | Male |
+| Antoni | Male |
+| Arnold | Male |
+| Bella | Female |
+| Domi | Female |
+| Elli | Female |
+| Josh | Male |
+| Rachel | Female |
+| Sam | Male |
+
+<Note>
+  When `random_voice = true`, the bot calls `client.voices.get_all()` each time it picks a voice. This counts against your ElevenLabs API quota. If you have custom voices on your account they will also be included in random selection.
+</Note>
+
+## API Costs and Free Tier
+
+ElevenLabs charges per character synthesised. The free tier provides a limited monthly character allowance. For a typical Reddit video at the default 50-second maximum, you can expect to consume roughly 500–1,500 characters depending on comment length.
+
+<Warning>
+  If you exceed your monthly quota, the API call will fail and the bot will exit with an error. Monitor your usage in the ElevenLabs dashboard and consider upgrading your plan if you are generating videos frequently.
+</Warning>
+
+<Tip>
+  Set `random_voice = false` and pin a specific `elevenlabs_voice_name` to avoid unexpected voice changes between runs and to make quota consumption more predictable.
+</Tip>

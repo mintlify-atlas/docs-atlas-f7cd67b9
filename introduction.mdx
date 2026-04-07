@@ -1,0 +1,72 @@
+---
+title: "Introduction"
+description: "Reddit Video Maker Bot automatically turns Reddit threads into short-form videos for TikTok, YouTube, and Instagram — no video editing required."
+---
+
+## What is Reddit Video Maker Bot?
+
+Reddit Video Maker Bot is an open-source Python tool that automates the entire process of creating Reddit-to-video content. It fetches a Reddit thread, generates text-to-speech audio for the post and comments, captures screenshots of the Reddit UI, and assembles everything into a finished video with a background clip and optional background music.
+
+The output is a ready-to-upload video file. You upload it manually — the bot intentionally does not auto-post to any platform.
+
+<Note>
+  The bot does not upload content on your behalf. It produces a local video file that you upload yourself, keeping you in full control of what gets published.
+</Note>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Automated video assembly" icon="film">
+    Downloads a Reddit thread, records TTS audio, takes screenshots of each comment, and renders the final video using FFmpeg — all in one command.
+  </Card>
+  <Card title="Multiple TTS engines" icon="microphone">
+    Supports TikTok, ElevenLabs, AWS Polly, Streamlabs Polly, Google Translate TTS, OpenAI TTS, and the system's built-in pyttsx3 engine.
+  </Card>
+  <Card title="Background video and audio" icon="video">
+    Ships with background video options including Minecraft, GTA, Rocket League, CS:GO Surf, Cluster Truck, and more. Background lofi music tracks are also included.
+  </Card>
+  <Card title="Subreddit and post targeting" icon="reddit">
+    Point the bot at any subreddit or paste a specific post ID. Multiple post IDs can be batched using `+` as a separator.
+  </Card>
+  <Card title="Light and dark themes" icon="sun">
+    Renders Reddit screenshots in light mode, dark mode, or with a transparent background for story mode videos.
+  </Card>
+  <Card title="NSFW filtering and story mode" icon="shield">
+    Optionally allow or block NSFW posts. Story mode reads only the title and post body, ideal for subreddits with long-form content.
+  </Card>
+  <Card title="Duplicate detection" icon="circle-check">
+    Tracks previously generated posts so the bot does not create the same video twice.
+  </Card>
+  <Card title="Post translation" icon="language">
+    Translates post content into dozens of languages before generating TTS audio, using the `post_lang` config option.
+  </Card>
+</CardGroup>
+
+## Requirements
+
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| Python | 3.10, 3.11, or 3.12 | Earlier and later major versions are not supported |
+| Playwright | Latest (installed via pip) | Used to screenshot Reddit posts |
+| FFmpeg | Any recent version | Required for video assembly; auto-installed on supported systems |
+
+<Warning>
+  The bot checks your Python version at startup and exits if it is not 3.10, 3.11, or 3.12. Make sure you are running the correct version before installing dependencies.
+</Warning>
+
+## Who is this for?
+
+Reddit Video Maker Bot is for content creators who want to produce Reddit-style narration videos at scale without manually recording, editing, or exporting footage. It is also useful for developers who want to experiment with automated video pipelines or extend the bot with new TTS engines or background sources.
+
+No video editing experience is required. The bot handles every step from fetching the thread to exporting the final `.mp4`.
+
+## Get started
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Install the bot and run it for the first time in a few minutes.
+  </Card>
+  <Card title="Docker setup" icon="docker" href="/docker">
+    Run the bot inside a Docker container without installing Python locally.
+  </Card>
+</CardGroup>

@@ -1,97 +1,65 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Reddit Video Maker Bot"
+description: "Create viral Reddit videos with AI voiceovers and gameplay backgrounds — fully automated with a single command."
 ---
 
-## Setting up
+Turn any Reddit thread into a short-form video ready for TikTok, YouTube Shorts, or Instagram Reels. The bot handles everything: fetching posts, generating voiceovers, capturing screenshots, and compositing the final video.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Install the bot and generate your first video in minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Configuration" icon="sliders" href="/configuration/reddit-credentials">
+    Connect your Reddit account and customize all video settings.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Text-to-Speech" icon="microphone" href="/tts/overview">
+    Choose from TikTok, ElevenLabs, OpenAI, AWS Polly, and more.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Video Creation" icon="film" href="/video/how-it-works">
+    Understand how background videos, audio, and screenshots are combined.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## How it works
 
-Everything you need to create world-class documentation.
+<Steps>
+  <Step title="Fetch a Reddit thread">
+    The bot connects to Reddit via the PRAW API and pulls a post from your chosen subreddit — either a specific post or one picked automatically from the hot feed.
+  </Step>
+  <Step title="Generate voiceovers">
+    Each comment (or the post body in story mode) is converted to speech using your chosen TTS engine. Supports TikTok, ElevenLabs, OpenAI, AWS Polly, Google Translate TTS, Streamlabs Polly, and pyttsx3.
+  </Step>
+  <Step title="Capture Reddit screenshots">
+    Playwright takes screenshots of the Reddit post and comments using the Reddit web UI, respecting your light/dark/transparent theme setting.
+  </Step>
+  <Step title="Compose the final video">
+    FFmpeg composites the comment screenshots and voiceovers over a looping gameplay background video (Minecraft, GTA, Rocket League, and more), with optional background music.
+  </Step>
+</Steps>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Key features
 
-## Need inspiration?
+<CardGroup cols={2}>
+  <Card title="Multiple TTS engines" icon="waveform">
+    TikTok, ElevenLabs, OpenAI, AWS Polly, Streamlabs Polly, Google Translate TTS, and system voices via pyttsx3.
+  </Card>
+  <Card title="Gameplay backgrounds" icon="gamepad">
+    Built-in support for Minecraft, GTA V, Rocket League, CS:GO surf, Cluster Truck, and more.
+  </Card>
+  <Card title="Story mode" icon="book-open">
+    Narrate long-form Reddit posts as a continuous story instead of reading individual comments.
+  </Card>
+  <Card title="AI thread sorting" icon="brain">
+    Use keyword similarity scoring to automatically pick the most relevant posts from a subreddit.
+  </Card>
+  <Card title="50+ languages" icon="language">
+    Translate post content and filenames into any of 50+ supported languages before generating the video.
+  </Card>
+  <Card title="Web GUI" icon="display">
+    Manage settings and background videos through a local Flask web interface.
+  </Card>
+</CardGroup>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<Note>
+  The bot creates video files locally — it does not upload to any platform automatically. You upload the finished video yourself.
+</Note>
